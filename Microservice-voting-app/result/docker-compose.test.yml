@@ -1,0 +1,118 @@
+# version: '2'
+
+# services:
+
+#   sut:
+#     build: ./tests/
+#     depends_on:
+#       - vote
+#       - result
+#       - worker
+#     networks:
+#       - front-tier
+
+#   vote:
+#     build: ../vote/
+#     ports: ["80"]
+#     depends_on:
+#       - redis
+#       - db
+#     networks:
+#       - front-tier
+#       - back-tier
+
+#   result:
+#     build: .
+#     ports: ["80"]
+#     depends_on:
+#       - redis
+#       - db
+#     networks:
+#       - front-tier
+#       - back-tier
+
+#   worker:
+#     build: ../worker/
+#     depends_on:
+#       - redis
+#       - db
+#     networks:
+#       - back-tier
+
+#   redis:
+#     image: redis:alpine
+#     networks:
+#       - back-tier
+
+#   db:
+#     image: postgres:9.4
+#     environment:
+#       POSTGRES_USER: "postgres"
+#       POSTGRES_PASSWORD: "postgres"
+#     volumes:
+#       - "db-data:/var/lib/postgresql/data"
+#     networks:
+#       - back-tier
+
+# volumes:
+#   db-data:
+
+# networks:
+#   front-tier:
+#   back-tier:
+
+version: '3.8'
+
+services:
+  vote:
+    build: ./vote
+    ports:
+      - "5050:8000"  # localhost:5050 → container:8000
+    depends_on:
+      - redis
+    networks:
+      - front-tier
+      - back-tier
+  
+  result:
+    build: ./result  
+    ports:
+      - "5051:4000"  # Check result's port (probably 4000)
+    depends_on:
+      - db
+    networks:
+      - front-tier
+      - back-tier
+  
+  worker:
+    build: ./worker
+    depends_on:
+      - redis
+      - db
+    networks:
+      - back-tier
+  
+  redis:
+    image: redis:alpine
+    networks:
+      - back-tier
+  
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    networks:
+      - back-tier
+  
+  sut:
+    build: ./tests
+    depends_on:
+      - vote
+      - result
+    networks:
+      - front-tier
+
+networks:
+  front-tier:
+  back-tier:
