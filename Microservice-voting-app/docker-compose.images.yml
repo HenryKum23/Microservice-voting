@@ -52,9 +52,12 @@ services:
 
   db:
     image: postgres:15-alpine
+    secrets:
+      - postgres_user
+      - postgres_password
     environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_USER_FILE: /run/secrets/postgres_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
     volumes:
       - "db-data:/var/lib/postgresql/data"
       - "./healthchecks:/healthchecks"
@@ -63,6 +66,12 @@ services:
       interval: "5s"
     networks:
       - back-tier
+      
+secrets:
+  postgres_user:
+    file: ./secrets/postgres_user.txt
+  postgres_password:
+    file: ./secrets/postgres_password.txt
 
 volumes:
   db-data:
